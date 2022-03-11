@@ -1,4 +1,5 @@
 const messageDiv = document.getElementById('message');
+const letterBtns = document.querySelectorAll('#keyboard button');
 
 const alphabet = ['A', 'B', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'R', 'S', 'Š', 'Z', 'Ž', 'T', 'U', 'V', 'Õ', 'Ä', 'Ö', 'Ü'];
 let nextPos = [0, 0];
@@ -16,29 +17,41 @@ fetch('words.txt')
     document.addEventListener('keydown', e => {
         
         if ( !isGameOver ) {
-
             const key = e.key.toUpperCase();
-            let nextCell = document.querySelector(`.container td[data-x="${nextPos[0]}"][data-y="${nextPos[1]}"]`);
-        
-            if ( alphabet.includes(key) && nextPos[0] <= 4 ) {
-                guess += key;
-                nextCell.innerText = key;
-                nextPos[0]++;
-            } else if ( key == 'ENTER' && nextPos[0] == 5 ) {
-                testWord();
-            } else if ( key == 'BACKSPACE' && nextPos[0] > 0 ) {
-                nextPos[0] -= 1;
-                guess = guess.slice(0, -1);
-                nextCell = document.querySelector(`.container td[data-x="${nextPos[0]}"][data-y="${nextPos[1]}"]`);
-                nextCell.innerText = '';
-                messageDiv.innerText = '';
-            }
+            testKey(key);
 
         }
     
     });
 
+        letterBtns.forEach(btn => {
+            btn.addEventListener('click', e => {
+                if ( !isGameOver ) {
+                    const key = e.currentTarget.dataset.key.toUpperCase();
+                    testKey(key);
+                }
+        });
+    });
+
 });
+
+function testKey ( key ) {
+        let nextCell = document.querySelector(`.container td[data-x="${nextPos[0]}"][data-y="${nextPos[1]}"]`);
+        
+    if ( alphabet.includes(key) && nextPos[0] <= 4 ) {
+        guess += key;
+        nextCell.innerText = key;
+        nextPos[0]++;
+    } else if ( key == 'ENTER' && nextPos[0] == 5 ) {
+        testWord();
+    } else if ( key == 'BACKSPACE' && nextPos[0] > 0 ) {
+        nextPos[0] -= 1;
+        guess = guess.slice(0, -1);
+        nextCell = document.querySelector(`.container td[data-x="${nextPos[0]}"][data-y="${nextPos[1]}"]`);
+        nextCell.innerText = '';
+        messageDiv.innerText = '';
+    }
+}
 
 function testWord () {
     if ( words.includes(guess.toLowerCase()) ) {
@@ -47,8 +60,10 @@ function testWord () {
 
         for ( let i = 0; i < guess.length; i++ ) {
             const testCell = document.querySelector(`.container td[data-x="${i}"][data-y="${nextPos[1]}"]`);
+            const virtualKey = document.querySelector(`#keyboard button[data-key="${correctWord[i]}"]`);
             if ( correctWord[i] == guess.charAt(i).toLowerCase() ) {
                 testCell.classList.add('correct-letter');
+                virtualKey.classList.add('correct-letter');
                 correctWord[i] = '*';
             }
         }
@@ -57,11 +72,14 @@ function testWord () {
             const letter = guess.charAt(i).toLowerCase();
 
             testCell = document.querySelector(`.container td[data-x="${i}"][data-y="${nextPos[1]}"]`);
+            const virtualKey = document.querySelector(`#keyboard button[data-key="${letter}"]`);
             if ( correctWord.includes(letter) && !testCell.classList.contains('correct-letter') ) {
                 testCell.classList.add('present-letter');
+                virtualKey.classList.add('present-letter');
                 correctWord[correctWord.indexOf(letter)] = '*';
             } else {
                 testCell.classList.add('missing-letter');
+                virtualKey.classList.add('missing-letter');
             }
         }
         
@@ -82,7 +100,8 @@ function testWord () {
 }
 
 function showAnswer  ( word ) {
-    fetch('https://cors-anywhere.herokuapp.com/http://www.eki.ee/dict/ekss/index.cgi?Z=json&Q=+' + word)
+    fetch('http://www.eki.ee/dict/ekss/index.cgi?Z=json&Q=+' + word)
+    header("Access-Control-Allow-Origin")
     .then(res => res.json())
     .then(data => {
         messageDiv.innerHTML = 'Õige sõna: ' + randomWord.toUpperCase() + '<span class="tooltiptext">' + data.result + '</span>';

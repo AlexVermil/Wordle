@@ -62,3 +62,24 @@ table td {
   .tooltip:hover .tooltiptext {
     visibility: visible;
   }
+
+  button {
+      height: 3em;
+      width: 3.9em;
+      margin: 0.1em;
+      border-radius: 0.1em;
+      border: none;
+      background-color: #d3d6da;
+      font-size: 0.3em;
+      font-weight: bold;
+      text-transform: uppercase;
+      cursor: pointer;
+  }
+
+  button:focus {
+      outline: 0;
+  }
+
+  .one-and-a-half {
+      flex: 1.5;
+  }
